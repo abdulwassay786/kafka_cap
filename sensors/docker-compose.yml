@@ -1,0 +1,37 @@
+version: "3.9"
+services:
+  sensorsmock:
+    build: .
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postapi  
+    environment:
+      - SMART_THERMO_BUCKET=ansari-capstone-data
+      - MOISTURE_MATE_URL=http://0.0.0.0:3000/moisturemate
+      - CARBON_SENSE_URL=http://0.0.0.0:3000/carbonsense
+      - AWS_ACCESS_KEY_ID=
+      - AWS_SECRET_ACCESS_KEY=
+      - AWS_SESSION_TOKEN=
+      
+  postapi:
+    build: ./post
+    container_name: postapi
+    ports:
+      - "3001:3001"
+      
+  getlux:
+   build: ./lux_microservice
+   container_name: getlux
+   ports: 
+     - "3002:3002"
+   depends_on:
+     - sensorsmock
+
+  broker:
+    image: ./kafka
+    container_name: broker
+    ports:
+      - "9092:9092"
+    depends_on:
+     - sensorsmock
